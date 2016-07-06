@@ -38,9 +38,8 @@ static void *TURecipientsContext = &TURecipientsContext;
 		_searchResultsTableView.dataSource = self.searchResultsDataSource;
 		_searchResultsTableView.delegate = self.searchResultsDelegate;
 		_searchResultsTableView.translatesAutoresizingMaskIntoConstraints = NO;
-		_searchResultsTableView.backgroundColor = [UIColor colorWithWhite:0.925 alpha:1.000];
         
-        [self _insetForKeyboard];
+        [self _updateTableViewInsets];
 		
 		if ([self.delegate respondsToSelector:@selector(recipientsDisplayController:didLoadSearchResultsTableView:)]) {
 			[self.delegate recipientsDisplayController:self didLoadSearchResultsTableView:_searchResultsTableView];
@@ -61,7 +60,7 @@ static void *TURecipientsContext = &TURecipientsContext;
 
 - (void)_showTableView
 {
-	if (!self.recipientsBar.searching) {
+	if (_searchResultsTableView.superview == nil) {
         if (_shouldBeginSearch) {
             UITableView *tableView = self.searchResultsTableView;
             
@@ -69,11 +68,16 @@ static void *TURecipientsContext = &TURecipientsContext;
                 [self.delegate recipientsDisplayController:self willShowSearchResultsTableView:tableView];
             }
             
-            [self.contentsController.view addSubview:tableView];
-            [self.contentsController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tableView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(tableView)]];
-            [self.contentsController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:[_recipientsBar][tableView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_recipientsBar, tableView)]];
             
-            [self.contentsController.view layoutIfNeeded];
+            if ([self.delegate respondsToSelector:@selector(recipientsDisplayController:displaySearchResultsTableView:)]) {
+                [self.delegate recipientsDisplayController:self displaySearchResultsTableView:tableView];
+            } else {
+                [self.contentsController.view addSubview:tableView];
+                [self.contentsController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"H:|[tableView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(tableView)]];
+                [self.contentsController.view addConstraints:[NSLayoutConstraint constraintsWithVisualFormat:@"V:|[tableView]|" options:0 metrics:nil views:NSDictionaryOfVariableBindings(_recipientsBar, tableView)]];
+                
+                [self.contentsController.view layoutIfNeeded];
+            }
             
             
             tableView.alpha = 0.0;
@@ -100,6 +104,8 @@ static void *TURecipientsContext = &TURecipientsContext;
             } completion:nil];
         }
 	}
+    
+    [self _updateTableViewInsets];
 }
 
 - (void)observeValueForKeyPath:(NSString *)keyPath ofObject:(id)object change:(NSDictionary *)change context:(void *)context
@@ -206,7 +212,7 @@ static void *TURecipientsContext = &TURecipientsContext;
     [UIView setAnimationBeginsFromCurrentState:YES];
     
     _keyboardFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    [self _insetForKeyboard];
+    [self _updateTableViewInsets];
     
     [UIView commitAnimations];
 }
@@ -219,21 +225,30 @@ static void *TURecipientsContext = &TURecipientsContext;
     [UIView setAnimationBeginsFromCurrentState:YES];
     
     _keyboardFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
-    [self _insetForKeyboard];
+    [self _updateTableViewInsets];
     
     [UIView commitAnimations];
 }
 
-- (void)_insetForKeyboard
+- (void)_updateTableViewInsets
 {
-    if (!CGRectIsEmpty(_keyboardFrame) && _searchResultsTableView != nil) {
-        CGRect keyboardFrameInView = [self.contentsController.view convertRect:_keyboardFrame fromView:nil];
-        CGFloat bottomInset = self.contentsController.view.frame.size.height - keyboardFrameInView.origin.y;
+    if (_searchResultsTableView != nil) {
+        CGRect keyboardFrameInView = [self.searchResultsTableView.superview convertRect:_keyboardFrame fromView:nil];
+        CGFloat bottomInset = CGRectGetMaxY(self.searchResultsTableView.frame) - keyboardFrameInView.origin.y;
         
         UIEdgeInsets contentInset = self.searchResultsTableView.contentInset;
         UIEdgeInsets scrollIndicatorInsets = self.searchResultsTableView.scrollIndicatorInsets;
-        contentInset.bottom = bottomInset;
-        scrollIndicatorInsets.bottom = bottomInset;
+        
+        if (!CGRectIsEmpty(_keyboardFrame)) {
+            contentInset.bottom = bottomInset;
+            scrollIndicatorInsets.bottom = contentInset.bottom;
+        }
+        
+        if (![self.delegate respondsToSelector:@selector(recipientsDisplayController:displaySearchResultsTableView:)]) {
+            contentInset.top = CGRectGetMaxY(self.recipientsBar.frame);
+            scrollIndicatorInsets.top = contentInset.top;
+        }
+        
         self.searchResultsTableView.contentInset = contentInset;
         self.searchResultsTableView.scrollIndicatorInsets = scrollIndicatorInsets;
     }
@@ -291,6 +306,10 @@ static void *TURecipientsContext = &TURecipientsContext;
 	if (_shouldBeginSearch && [self.delegate respondsToSelector:@selector(recipientsDisplayControllerDidBeginSearch:)]) {
 		[self.delegate recipientsDisplayControllerDidBeginSearch:self];
 	}
+    
+    if (recipientsBar.text.length > 0) {
+		[self _showTableView];
+	}
 }
 
 - (BOOL)recipientsBarShouldEndEditing:(TURecipientsBar *)recipientsBar
@@ -322,6 +341,8 @@ static void *TURecipientsContext = &TURecipientsContext;
 	if ([self.delegate respondsToSelector:@selector(recipientsDisplayControllerDidEndSearch:)]) {
 		[self.delegate recipientsDisplayControllerDidEndSearch:self];
 	}
+    
+    [self _hideTableView];
 }
 
 - (void)recipientsBar:(TURecipientsBar *)recipientsBar textDidChange:(NSString *)searchText

@@ -1,19 +1,18 @@
-# TURecipientBar [![license BSD](http://b.repl.ca/v1/license-BSD-blue.png)](LICENSE.md)
+# ![TURecipientBar](http://f.cl.ly/items/2t2b39213t130o2N2w2S/WordMark.svg) 
 
-![Current Version](https://cocoapod-badges.herokuapp.com/v/TURecipientBar/1.1.0/badge.png)
-![Library Platform](https://cocoapod-badges.herokuapp.com/p/TURecipientBar/badge.png)
+[![Version](https://img.shields.io/cocoapods/v/TURecipientBar.svg?style=flat)](http://cocoadocs.org/docsets/TURecipientBar)
+[![License](https://img.shields.io/cocoapods/l/TURecipientBar.svg?style=flat)](http://cocoadocs.org/docsets/TURecipientBar)
+[![Platform](https://img.shields.io/cocoapods/p/TURecipientBar.svg?style=flat)](http://cocoadocs.org/docsets/TURecipientBar)
 
 `TURecipientBar` is a `UIView` for entering recipients similarly to the iOS Mail app. It handles search and display of recipients.
 
-![Screenshot](Screenshot.gif)
-
-> See a more extensive preview at [http://cl.ly/171y2V072007](http://cl.ly/171y2V072007)
+[![Screenshot](Screenshot.gif)](http://cl.ly/1h2Y3D0V3j2x)
 
 ## Installation
 
-### [Cocoapods](http://cocoapods.org)
+### [CocoaPods](http://cocoapods.org)
 
-1. Add `pod TURecipientBar` to your Podfile.
+1. Add `pod TURecipientBar, '~> 2.0'` to your Podfile.
 2. Run 'pod install'
 3. Import `TURecipientsBar.h` and `TURecipientsDisplayController.h`.
 

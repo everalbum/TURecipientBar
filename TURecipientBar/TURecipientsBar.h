@@ -37,8 +37,10 @@
  The default value is "To: ".
  
  You can set this to nil to disable the label entirely.
+ 
+ Use `toLabel` instead.
  */
-@property (nonatomic, copy) NSString *label;
+@property (nonatomic, copy) NSString *label __attribute__((deprecated));
 
 /** The string that is displayed when there is no other text in the search field.
  
@@ -80,6 +82,18 @@
  */
 @property (nonatomic, readonly) UITextField *textField;
 
+@property (nonatomic, readonly) UIView *lineView;
+
+@property (nonatomic, readonly) UIButton *addButton;
+
+@property (nonatomic, readonly) UILabel *summaryLabel;
+
+/** The label in front of both the search field and tokens.
+ 
+ The default text is "To: ". You can set the text to nil to disable the label entirely.
+ */
+@property (nonatomic, readonly) UILabel *toLabel;
+
 /** Whether the add button should appear.
  
  The add button calls the delegates method -recipientsBarAddButtonClicked:. It is a UIButtonTypeContactAdd type button.
@@ -92,6 +106,12 @@
  */
 @property (nonatomic) BOOL showsBottomBorder;
 
+/** Whether the layer shadows should be hidden.
+ 
+ The display layer adds a shadow during search, this boolean allows them to be hidden.
+ */
+@property (nonatomic) BOOL showsShadows;
+
 /** Whether adding and removing recipients should be animated.
  
  Hint: they should. This is turned on by defualt.
@@ -99,6 +119,12 @@
  When turned on, recipients will fade and zoom. When turned off, they will snap immediately.
  */
 @property (nonatomic) BOOL animatedRecipientsInAndOut;
+
+/** Control the height of the bar while searching.
+ 
+ By default, the bar shrinks down to a single line when the user is searching for a recipient. When this is set to `YES`, the control will remain at it's full height.
+ */
+@property (nonatomic) BOOL showsMultipleLinesWhileSearching;
 
 /** The height constraint for the entire bar.
  
@@ -219,7 +245,7 @@
 
 /** The text attributes applied to the label.
  */
-@property (nonatomic, copy) NSDictionary *labelTextAttributes UI_APPEARANCE_SELECTOR;
+@property (nonatomic, copy) NSDictionary *labelTextAttributes UI_APPEARANCE_SELECTOR __attribute__((deprecated));
 
 /** The text attributes applied to the summary.
  */
@@ -236,6 +262,12 @@
  Note that at this time, changing summaryTextAttributes or recipientTitleTextAttributesForState: will not change the placeholder attributes.
  */
 @property (nonatomic, copy) NSDictionary *placeholderTextAttributes UI_APPEARANCE_SELECTOR;
+
+/** Whether the recipient bar should use a visual effect for it's background.
+ 
+ When set to true, the background will use a UIVisualEffectView for it's background that matches UINavigationBar. When set to false (the default) a plain white background is used. This is good for bars that are placed directly below the navigation bar without other entry fields. The messages app uses this style while the mail app does not.
+ */
+@property (nonatomic) BOOL usesTransparency UI_APPEARANCE_SELECTOR;
 
 @end
 
